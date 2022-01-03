@@ -21,9 +21,7 @@ class MainActivity : AppCompatActivity() {
             Log.i("TEST", "Button pressed")
             viewModel.downloadImage()
             viewModel.liveData.observe(this) {
-                if (viewModel.liveData.value != null) {
-                    img.setImageBitmap(viewModel.liveData.value)
-                }
+                img.setImageBitmap(viewModel.liveData.value)
             }
         }
     }
