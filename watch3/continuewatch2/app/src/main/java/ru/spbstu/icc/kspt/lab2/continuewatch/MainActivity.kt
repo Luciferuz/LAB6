@@ -31,10 +31,8 @@ class MainActivity : AppCompatActivity() {
                 while (true) {
                     delay(1000)
                     Log.i("TEST","RUNNING")
-                    textSecElapsed.post {
-                        val updateTime = secondsElapsed + ((System.currentTimeMillis() - start)/1000)
-                        textSecElapsed.text = getString(R.string.text_view, updateTime)
-                    }
+                    val updateTime = secondsElapsed + ((System.currentTimeMillis() - start)/1000)
+                    textSecElapsed.text = getString(R.string.text_view, updateTime)
                 }
             }
         }
@@ -42,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.i("TEST","STOPPED")
+        Log.i("TEST", "Number of threads: " + Thread.getAllStackTraces().size)
         end = System.currentTimeMillis()
         secondsElapsed += ((end - start)/1000).toInt()
         with(sharedPref.edit()) {

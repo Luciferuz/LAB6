@@ -1,5 +1,6 @@
 package ru.spbstu.icc.kspt.lab2.continuewatch
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -8,14 +9,26 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class MainActivity : AppCompatActivity() {
     lateinit var textSecElapsed: TextView
     lateinit var sharedPref: SharedPreferences
-    lateinit var executorService: ExecutorService
+    lateinit var backgroundTask: Future<*>
     var start: Long = 0
     var end: Long = 0
     var secondsElapsed: Int = 0
+
+    private fun backgroundTask(executorService: ExecutorService) = executorService.submit {
+        while (!backgroundTask.isCancelled) {
+            Thread.sleep(1000)
+            Log.i("TEST","RUNNING")
+            textSecElapsed.post {
+                val newTime = secondsElapsed + ((System.currentTimeMillis() - start)/1000)
+                textSecElapsed.text = getString(R.string.text_view, newTime)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +41,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.i("TEST","STOPPED")
+        Log.i("TEST", "Number of threads: " + Thread.getAllStackTraces().size)
+        backgroundTask.cancel(true)
         end = System.currentTimeMillis()
-        executorService.shutdown()
         secondsElapsed += ((end - start)/1000).toInt()
         with(sharedPref.edit()) {
             putInt("Seconds elapsed", secondsElapsed)
@@ -42,18 +56,12 @@ class MainActivity : AppCompatActivity() {
         Log.i("TEST","STARTED")
         start = System.currentTimeMillis()
         secondsElapsed = sharedPref.getInt("Seconds elapsed", secondsElapsed)
-        executorService = Executors.newSingleThreadExecutor()
-        executorService.execute {
-            while (!executorService.isShutdown) {
-                Thread.sleep(1000)
-                Log.i("TEST","RUNNING")
-                textSecElapsed.post {
-                    val newTime = secondsElapsed + ((System.currentTimeMillis() - start)/1000)
-                    textSecElapsed.text = getString(R.string.text_view, newTime)
-                }
-            }
-        }
+        backgroundTask = backgroundTask((applicationContext as ExecutorClass).executorService)
         super.onStart()
     }
 
+}
+
+class ExecutorClass : Application() {
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
 }

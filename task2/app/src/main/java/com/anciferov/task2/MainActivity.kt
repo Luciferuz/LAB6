@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        super.onResume()
         Log.i("TEST", "On Resume")
         Log.i("TEST", "Number of threads: " + Thread.getAllStackTraces().size)
         super.onResume()
