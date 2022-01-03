@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.i("TEST","STOPPED")
+        Log.i("TEST", "Number of threads: " + Thread.getAllStackTraces().size)
         end = System.currentTimeMillis()
         thread.interrupt()
         secondsElapsed += ((end - start)/1000).toInt()
